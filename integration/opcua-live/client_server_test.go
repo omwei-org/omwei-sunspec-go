@@ -2,10 +2,10 @@ package opqualive
 
 import (
 	"context"
-	"fmt"
 	"testing"
 	"time"
 
+	omwei "github.com/omwei-org/omwei-iot-go"
 	omweiopcua "github.com/omwei-org/omwei-sunspec-go/opcua"
 	opcua "github.com/otfabric/go-opcua"
 	"github.com/otfabric/go-opcua/server"
@@ -14,8 +14,8 @@ import (
 
 const (
 	testNamespaceURI = "urn:omwei:cross-protocol-test"
-	uncefactURI      = "http://www.opcfoundation.org/UA/units/un/cefact"
-	wattUnitID       = int32(5723220) // UN/CEFACT code W, per OPC UA Part 8 mapping
+	testUnitsURI     = "urn:omwei:test-unit-registry"
+	testUnitID       = int32(42)
 )
 
 func TestLiveClientReadsValueAndEUInformation(t *testing.T) {
@@ -30,10 +30,10 @@ func TestLiveClientReadsValueAndEUInformation(t *testing.T) {
 	ns := server.NewNodeNameSpace(srv, testNamespaceURI)
 	valueNode := ns.AddNewVariableStringNode("ActivePower", float64(123.4))
 	unitNode := ns.AddNewVariableStringNode("ActivePowerEngineeringUnits", ua.NewExtensionObject(&ua.EUInformation{
-		NamespaceURI: uncefactURI,
-		UnitID:       wattUnitID,
+		NamespaceURI: testUnitsURI,
+		UnitID:       testUnitID,
 		DisplayName:  ua.NewLocalizedText("W"),
-		Description:  ua.NewLocalizedText("watt"),
+		Description:  ua.NewLocalizedText("test watt unit"),
 	}))
 
 	if err := srv.Start(ctx); err != nil {
@@ -79,14 +79,18 @@ func TestLiveClientReadsValueAndEUInformation(t *testing.T) {
 	}
 
 	configuredUnits := map[omweiopcua.EngineeringUnitID]string{
-		{NamespaceURI: uncefactURI, UnitID: wattUnitID}: "W",
+		{NamespaceURI: testUnitsURI, UnitID: testUnitID}: "W",
 	}
 	unit, err := omweiopcua.ResolveEngineeringUnit(unitInfo.NamespaceURI, unitInfo.UnitID, configuredUnits)
 	if err != nil {
 		t.Fatalf("resolve server EUInformation: %v", err)
 	}
 
-	source := omweiopcuaSourceIdentity()
+	source := omwei.SourceIdentity{
+		Protocol: "opcua",
+		Device:   "loopback-test-server",
+		Point:    "nsu=" + testNamespaceURI + ";s=ActivePower",
+	}
 	sample, err := omweiopcua.SourceSampleFromValue(source, value, unit)
 	if err != nil {
 		t.Fatalf("normalize live OPC UA read: %v", err)
@@ -94,18 +98,4 @@ func TestLiveClientReadsValueAndEUInformation(t *testing.T) {
 	if sample.Value != "123.4" || sample.Unit != "W" {
 		t.Fatalf("unexpected normalized sample: %+v", sample)
 	}
-	if source.Point != fmt.Sprintf("nsu=%s;s=ActivePower", testNamespaceURI) {
-		t.Fatalf("source point identity must be namespace-URI based, got %q", source.Point)
-	}
-}
-
-func omweiopcuaSourceIdentity() omweiopcuaSource {
-	return omweiopcuaSource{Protocol: "opcua", Device: "loopback-test-server", Point: "nsu=urn:omwei:cross-protocol-test;s=ActivePower"}
-}
-
-// Local mirror avoids exposing test-only helpers from the production package.
-type omweiopcuaSource = struct {
-	Protocol string
-	Device   string
-	Point    string
 }
