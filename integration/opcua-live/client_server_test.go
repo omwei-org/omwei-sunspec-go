@@ -53,28 +53,34 @@ func TestLiveClientReadsValueAndEUInformation(t *testing.T) {
 	}
 	defer client.Close(context.Background())
 
-	valueDV, err := client.ReadValue(ctx, valueNode.ID())
+	// Read the numeric value and EUInformation in one OPC UA Read service call,
+	// so the sample does not combine two independently acquired read contexts.
+	results, err := client.ReadMulti(ctx, []opcua.ReadItem{
+		{NodeID: valueNode.ID(), AttributeID: ua.AttributeIDValue},
+		{NodeID: unitNode.ID(), AttributeID: ua.AttributeIDValue},
+	})
 	if err != nil {
-		t.Fatalf("read ActivePower: %v", err)
+		t.Fatalf("read ActivePower and EngineeringUnits: %v", err)
 	}
-	if valueDV == nil || valueDV.Value == nil {
-		t.Fatal("ActivePower returned no value")
+	if len(results) != 2 {
+		t.Fatalf("ReadMulti returned %d results, want 2", len(results))
 	}
-	value := valueDV.Value.Value()
+	for i, result := range results {
+		if result.StatusCode != ua.StatusOK {
+			t.Fatalf("read result %d returned status %v", i, result.StatusCode)
+		}
+		if result.DataValue == nil || result.DataValue.Value == nil {
+			t.Fatalf("read result %d returned no value", i)
+		}
+	}
+
+	value := results[0].DataValue.Value.Value()
 	if value != float64(123.4) {
 		t.Fatalf("unexpected OPC UA value: %T(%v)", value, value)
 	}
-
-	unitDV, err := client.ReadValue(ctx, unitNode.ID())
-	if err != nil {
-		t.Fatalf("read EngineeringUnits: %v", err)
-	}
-	if unitDV == nil || unitDV.Value == nil {
-		t.Fatal("EngineeringUnits returned no value")
-	}
-	extension, ok := unitDV.Value.Value().(*ua.ExtensionObject)
+	extension, ok := results[1].DataValue.Value.Value().(*ua.ExtensionObject)
 	if !ok {
-		t.Fatalf("EngineeringUnits has unexpected wire value type %T", unitDV.Value.Value())
+		t.Fatalf("EngineeringUnits has unexpected wire value type %T", results[1].DataValue.Value.Value())
 	}
 	unitInfo, ok := extension.Value.(*ua.EUInformation)
 	if !ok {
