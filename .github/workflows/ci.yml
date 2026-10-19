@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out companion
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.23.x"
+          cache: true
+
+      - name: Tidy module
+        run: |
+          go mod tidy -v
+          git diff --exit-code -- go.mod go.sum
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Test
+        run: go test ./...
+
+      - name: Check core source-mapping vectors
+        env:
+          CORE_SHA: c7609d8b463493dfaaa010762ef6072c5d2a2043
+        run: |
+          git clone https://github.com/omwei-org/omwei-iot-go.git "$RUNNER_TEMP/omwei-iot-go"
+          git -C "$RUNNER_TEMP/omwei-iot-go" checkout "$CORE_SHA"
+          cd "$RUNNER_TEMP/omwei-iot-go"
+          go run ./cmd/source-mapping-vectors
