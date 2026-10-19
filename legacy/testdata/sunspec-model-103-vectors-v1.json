@@ -1,0 +1,33 @@
+{
+  "schema_version": "1",
+  "source": "SunSpec Models repository, Model 103: W with W_SF",
+  "source_url": "https://github.com/SunSpec/models/blob/master/json/model_103.json",
+  "note": "Synthetic conformance vector for the scale-factor rule; not a captured device response or vendor register address.",
+  "vectors": [
+    {
+      "name": "model-103-active-power-w-sf-zero",
+      "model_id": 103,
+      "point": "W",
+      "scale_factor_point": "W_SF",
+      "raw_value": 123,
+      "scale_factor": 0,
+      "engineering_value": "123",
+      "descriptor_id": 69,
+      "encoded_value": 123,
+      "wire_hex": "00450000007b"
+    },
+    {
+      "name": "model-103-active-power-negative-scale-factor",
+      "model_id": 103,
+      "point": "W",
+      "scale_factor_point": "W_SF",
+      "raw_value": 1234,
+      "scale_factor": -1,
+      "engineering_value": "123.4",
+      "descriptor_id": 69,
+      "encoded_value": 123,
+      "wire_hex": "00450000007b",
+      "rounded": true
+    }
+  ]
+}
