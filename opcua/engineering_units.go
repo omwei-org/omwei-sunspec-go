@@ -27,7 +27,8 @@ func ResolveEngineeringUnit(namespaceURI string, unitID int32, configured map[En
 		return "", fmt.Errorf("%w: EUInformation NamespaceURI is empty", ErrMissingUnit)
 	}
 	unit, ok := configured[key]
-	if !ok || strings.TrimSpace(unit) == "" {
+	unit = strings.TrimSpace(unit)
+	if !ok || unit == "" {
 		return "", fmt.Errorf("%w: no configured mapping for namespace %q and UnitID %d", ErrMissingUnit, key.NamespaceURI, unitID)
 	}
 	return unit, nil
