@@ -7,23 +7,30 @@ Experimental, transport-neutral OPC UA value adapter for
 
 `SourceSampleFromValue` converts a numeric value and an explicitly resolved
 engineering unit into OMWEI's `SourceSample`. It does not implement OPC UA
-client transport or browse/resolve node metadata. It deliberately does not
-infer engineering units from display names, and rejects missing units,
-unsupported value types, non-finite floats, and values exceeding the core's
-plain-decimal precision contract.
+client transport or browse nodes. It rejects missing units, unsupported value
+types, non-finite floats, and values exceeding the core's plain-decimal
+precision contract.
 
-The caller must bind the value and unit to the same successful OPC UA read
-context. Configure `SourceIdentity.Point` with a stable node identity (prefer
-namespace URI plus node identifier), not a display name. This adapter does not
-authenticate device identity or establish freshness/atomicity.
+`ResolveEngineeringUnit` resolves an OPC UA `EUInformation` pair
+(`NamespaceURI`, numeric `UnitID`) through an explicit, provisioned allowlist.
+It intentionally ignores localized `DisplayName` and `Description`; unknown
+namespace/unit pairs fail closed. The allowlist must be based on the applicable
+OPC UA/UN-CEFACT unit registry and deployment configuration. No numeric unit
+ID is hard-coded or inferred by this adapter.
+
+The caller must bind the value and engineering-unit metadata to the same
+successful OPC UA read context. Configure `SourceIdentity.Point` with a stable
+node identity (prefer namespace URI plus node identifier), not a display name.
+This adapter does not authenticate device identity or establish
+freshness/atomicity.
 
 ## Cross-protocol demonstration
 
 The intended comparison feeds both this adapter and the existing SunSpec
 companion adapter into the same core `SourceMapping`. For equivalent physical
 values and matching source-unit configuration, compare canonical atom bytes,
-`Rounded`, and errors. The example tests use synthetic values; they do not
-claim a live OPC UA server or physical-device test.
+`Rounded`, and errors. Current tests use synthetic values and a synthetic
+unit allowlist; they do not claim a live OPC UA server or physical-device test.
 
 The adapter intentionally has no dependency on a particular OPC UA client
 library. This keeps protocol client lifecycle/security policy and Go toolchain
