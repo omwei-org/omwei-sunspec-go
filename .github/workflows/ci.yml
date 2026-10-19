@@ -25,6 +25,13 @@ jobs:
       - name: Tidy module
         run: go mod tidy -v
 
+      - name: Show resolved module files
+        run: |
+          echo '--- go.mod ---'
+          cat go.mod
+          echo '--- go.sum ---'
+          cat go.sum
+
       - name: Vet
         run: go vet ./...
 
