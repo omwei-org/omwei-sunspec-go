@@ -16,9 +16,13 @@ The current released `otfabric/go-opcua` v1.2.0 requires Go 1.25, while this pro
 
 ## Cross-protocol demonstration
 
-`cross_protocol_parity_test.go` feeds equivalent synthetic values through both protocol adapters and the same core mapping contract. It checks matching atom values, `Rounded` results, and rejection of negative active power. `integration/opcua-live` also runs a loopback OPC UA server/client test that reads the numeric value and `EUInformation` in one OPC UA Read service request, then normalizes the sample. The live OPC UA test uses synthetic server data; no physical SunSpec device or hardware-in-the-loop system is exercised.
+`cross_protocol_parity_test.go` feeds equivalent synthetic values through both protocol adapters and the same core mapping contract. It checks matching atom values, `Rounded` results, and rejection of negative active power.
 
-The purpose is to demonstrate that protocol libraries decode transport-specific data while OMWEI's semantic mapping produces a common canonical representation. It does not claim live interoperability, vendor certification, EABC conformance, cryptographic device identity, register-map correctness for a particular vendor, freshness, or atomicity of device updates.
+The isolated `integration/opcua-live` module starts a loopback OPC UA server/client, reads a synthetic numeric value and `EUInformation` in one OPC UA Read service request, then compares its normalized canonical result with a `go-sunspec.DecodedPoint` fixture passed through the existing SunSpec adapter. The OPC UA transport path is live software communication; the SunSpec side starts at the decoded-output boundary and does not perform a live Modbus acquisition. Both values are synthetic.
+
+For exact prerequisites, commands, expected output, and explicit scope limitations, see [the reproducible demonstration guide](integration/opcua-live/README.md).
+
+The purpose is to demonstrate that protocol-specific inputs can converge on a common canonical representation through OMWEI's semantic mapping. It does not claim both inputs describe the same physical measurement. It also does not claim live SunSpec device interoperability, vendor certification, EABC conformance, cryptographic device identity, register-map correctness for a particular vendor, freshness, or atomicity of device updates.
 
 ## Development
 
@@ -30,7 +34,7 @@ go vet ./...
 go test ./...
 ```
 
-CI runs the core repository's transport-neutral source-mapping interoperability vectors at a pinned core revision. The separate `integration/opcua-live` module uses Go 1.25 and tests the live OPC UA client/server protocol path; it does not raise the production module's Go 1.23 requirement. These tests validate software behavior, not protocol-adapter conformance or physical-device integration.
+CI runs the core repository's transport-neutral source-mapping interoperability vectors at a pinned core revision. The separate `integration/opcua-live` module uses Go 1.25 and tests the live OPC UA client/server protocol path plus the cross-protocol comparison against a decoded SunSpec fixture; it does not raise the production module's Go 1.23 requirement. These tests validate software behavior, not physical-device integration or protocol-adapter conformance.
 
 ## Dependencies
 
