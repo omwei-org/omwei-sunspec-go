@@ -12,11 +12,11 @@ The adapter requires a provisioned source identity and an implemented `W` point 
 
 The `opcua` package converts a numeric OPC UA value and an explicitly resolved engineering unit into the same `SourceSample` contract. It is deliberately transport-neutral and does not implement an OPC UA client, browse node metadata, infer units from display names, authenticate a server/device, or establish sample freshness. The caller must bind the value and unit to the same successful OPC UA read context.
 
-The current `otfabric/go-opcua` main branch declares Go 1.26, while this companion uses Go 1.23. The adapter therefore does not add that dependency until a compatible released client version/toolchain is selected and validated.
+The current released `otfabric/go-opcua` v1.2.0 requires Go 1.25, while this production companion uses Go 1.23. The dependency is therefore isolated in `integration/opcua-live` and is not imported by the production adapter package.
 
 ## Cross-protocol demonstration
 
-`cross_protocol_parity_test.go` feeds equivalent synthetic values through both protocol adapters and the same core mapping contract. It checks matching atom values, `Rounded` results, and rejection of negative active power. The examples are synthetic; no live OPC UA server or physical SunSpec device is exercised.
+`cross_protocol_parity_test.go` feeds equivalent synthetic values through both protocol adapters and the same core mapping contract. It checks matching atom values, `Rounded` results, and rejection of negative active power. `integration/opcua-live` also runs a loopback OPC UA server/client test that reads the numeric value and `EUInformation` in one OPC UA Read service request, then normalizes the sample. The live OPC UA test uses synthetic server data; no physical SunSpec device or hardware-in-the-loop system is exercised.
 
 The purpose is to demonstrate that protocol libraries decode transport-specific data while OMWEI's semantic mapping produces a common canonical representation. It does not claim live interoperability, vendor certification, EABC conformance, cryptographic device identity, register-map correctness for a particular vendor, freshness, or atomicity of device updates.
 
@@ -30,7 +30,7 @@ go vet ./...
 go test ./...
 ```
 
-CI also runs the core repository's transport-neutral source-mapping interoperability vectors at a pinned core revision. Those vectors validate the core mapping contract, not protocol-adapter conformance.
+CI runs the core repository's transport-neutral source-mapping interoperability vectors at a pinned core revision. The separate `integration/opcua-live` module uses Go 1.25 and tests the live OPC UA client/server protocol path; it does not raise the production module's Go 1.23 requirement. These tests validate software behavior, not protocol-adapter conformance or physical-device integration.
 
 ## Dependencies
 
