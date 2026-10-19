@@ -1,5 +1,5 @@
-github.com/omwei-org/omwei-iot-go v0.0.0-20261018151953-c7609d8b4634 h1:NTORAyb0LytkjpU5hLer5B9ACiKgs4mDCj5H6Wi+YLQ=
-github.com/omwei-org/omwei-iot-go v0.0.0-20261018151953-c7609d8b4634/go.mod h1:cQw/XVEVXSLgV8tkrXsKEQeSOZ+Fwj2LJEl2TVjChXQ=
+github.com/omwei-org/omwei-iot-go v0.2.0 h1:e08dHPr9ZolhBaS10Kk2ME3W8A4oZaqWVUAxJCOuiMo=
+github.com/omwei-org/omwei-iot-go v0.2.0/go.mod h1:cQw/XVEVXSLgV8tkrXsKEQeSOZ+Fwj2LJEl2TVjChXQ=
 github.com/otfabric/go-modbus v1.5.0 h1:HzRnRRxWyJoultBVBdStPygqEGNXnF6eXwxTNkaLN5g=
 github.com/otfabric/go-modbus v1.5.0/go.mod h1:MzvVbkVt64PgyXovbyvveZ/AIjmKDglg1URBQEpq9Kg=
 github.com/otfabric/go-serial v0.1.6 h1:RutkVzTUsS/hnEVFatd7ES/fTBSgLS5uJAD3N42eowU=
