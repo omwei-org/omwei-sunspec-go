@@ -29,14 +29,16 @@ freshness/atomicity.
 The intended comparison feeds both this adapter and the existing SunSpec
 companion adapter into the same core `SourceMapping`. For equivalent physical
 values and matching source-unit configuration, compare canonical atom bytes,
-`Rounded`, and errors. Current tests use synthetic values and a synthetic
-unit allowlist; they do not claim a live OPC UA server or physical-device test.
+`Rounded`, and errors. The repository includes a Go 1.25 isolated integration
+module under `integration/opcua-live`: it starts a loopback OPC UA server, reads
+a numeric value and an `EUInformation` ExtensionObject in one OPC UA Read
+request, resolves the unit, and normalizes a `SourceSample`. Its values and
+unit registry are synthetic; no physical device is exercised.
 
-The adapter intentionally has no dependency on a particular OPC UA client
-library. This keeps protocol client lifecycle/security policy and Go toolchain
-requirements separate from semantic normalization. A live integration can
-compose it with an OPC UA client after selecting and validating that client's
-supported Go version and metadata APIs.
+The production adapter intentionally has no dependency on a particular OPC UA
+client library. This keeps protocol client lifecycle/security policy and Go
+toolchain requirements separate from semantic normalization. The isolated
+integration module currently validates composition with `github.com/otfabric/go-opcua v1.2.0`; that module requires Go 1.25 and is not imported by the Go 1.23 production module.
 
 ## Development
 
@@ -50,7 +52,7 @@ go test ./...
 
 ## Limits
 
-- No live OPC UA server integration or hardware-in-the-loop test.
+- Live loopback OPC UA client/server software test exists; no physical-device or hardware-in-the-loop test.
 - No automatic conversion between units; the core mapping must explicitly
   define any conversion.
 - `SourceSample` is not proof of device authenticity, freshness, or atomicity.
