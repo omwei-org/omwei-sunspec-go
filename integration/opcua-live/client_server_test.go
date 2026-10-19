@@ -22,11 +22,14 @@ func TestLiveClientReadsValueAndEUInformation(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	srv := server.New(
+	srv, err := server.New(
 		server.EndPoint("localhost", 48491),
 		server.EnableSecurity("None", ua.MessageSecurityModeNone),
 		server.EnableAuthMode(ua.UserTokenTypeAnonymous),
 	)
+	if err != nil {
+		t.Fatalf("create OPC UA test server: %v", err)
+	}
 	ns := server.NewNodeNameSpace(srv, testNamespaceURI)
 	valueNode := ns.AddNewVariableStringNode("ActivePower", float64(123.4))
 	unitNode := ns.AddNewVariableStringNode("ActivePowerEngineeringUnits", ua.NewExtensionObject(&ua.EUInformation{
